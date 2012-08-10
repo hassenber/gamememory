@@ -1,0 +1,64 @@
+/**
+ * supports.js 4.0 (29-Mar-2010) (c) by Christian Effenberger. All Rights Reserved.
+ * supports.js is freely distributable under the terms of an GPL-style license.
+
+ * syntax: 
+ 	(css-feature == DOM syntax)
+ 	(css-value	 == CSS syntax)
+
+STR=supports.style( css-feature ); e.g. "borderRadius" | "boxShadow" ...
+	STR|BOL == "O"|"Ms"|"Khtml"|"Webkit"|"Moz"|"" + css-feature || false
+
+STR=supports.value( css-feature , css-value ); e.g. "cursor","zoom-in" ...
+	STR|BOL == ("-" + "o"|"ms"|"khtml"|"webkit"|"moz" + "-" || "") + css-value || false
+
+BOL=supports.vml();
+BOL=supports.svg();
+
+BOL=supports.canvas();
+BOL=supports.canvas( canvas-feature ); e.g. "toDataURL" | "fillText" | "getImageData" ...
+
+BOL=supports.audio();
+STR=supports.audio( mime-type, codec ); e.g. "ogg","flac" or "mpeg","mpeg" ...
+	STR|BOL == ("probably"|"maybe") || false
+
+BOL=supports.video();
+STR=supports.video( mime-type, codec ); e.g. "mp4","avc1.42E01E, mp4a.40.2" or "ogg","theora, vorbis" ...
+	STR|BOL == ("probably"|"maybe") || false
+
+BOL=supports.event( event-name [, html-element ]); e.g. "online","document.body" ...
+
+BOL=supports.window( html5-feature ); e.g. "Worker" | "localStorage" | "applicationCache" ...
+BOL=supports.navig( special-feature ); e.g. "onLine" | "geolocation" | "orientation" ...
+
+STR=supports.engine;
+	STR == "O"|"Ms"|"Khtml"|"Webkit"|"Moz"|""
+		   "O"		== presto
+		   "Ms"		== trident
+		   "Khtml"	== khtml
+		   "Webkit"	== webkit
+		   "Moz"	== gecko
+		   ""		== unknown
+
+FLT=supports.version;
+STR=supports.released;
+
+ *
+**/
+var supports = {version : 4.0, released : '2010-03-29 16:01:00',
+	engine	: (window.opera?"O":document.all&&!window.opera?"Ms":navigator.userAgent.indexOf('WebKit')>-1?"Webkit":navigator.userAgent.indexOf('KHTML')>-1&&navigator.userAgent.indexOf('WebKit')==-1?"Khtml":navigator.userAgent.indexOf('Gecko')>-1&&window.updateCommands?"Moz":""),
+	/* remove the functions you don't want to use by deleting the line of the function */
+	navig   : function(v) {if(v&&(typeof v==='string')) {return (typeof navigator[v]!='undefined');} return false;},
+	window	: function(v) {if(v&&(typeof v==='string')) {return (typeof window[v]!='undefined');} return false;},
+    vml		: function() {var vs=false; if(document.all&&document.namespaces&&!window.opera) {var a=document.body.appendChild(document.createElement('div'));a.innerHTML='<v:shape id="vml_flag1" adj="1" />';var b=a.firstChild;b.style.behavior="url(#default#VML)";vs=b?typeof b.adj=="object":true;a.parentNode.removeChild(a);} return vs;},
+    svg		: function() {return Boolean(window.SVGAngle||document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1"));},
+	canvas 	: function(v) {var t=document.createElement('canvas'),c=false; if(t.tagName.toUpperCase()=="CANVAS") {try {c=t.getContext("2d");}catch(e) {}} if(c&&v&&(typeof v==='string')){if(c[v]){return true;}else if(t[v]){return true;}else{return false;}}else {return Boolean(c);}},
+	audio	: function(v,c) {var b=0,t=document.createElement('audio'),p=t.canPlayType; if(p&&v&&(typeof v==='string')){if(c&&(typeof c==='string')){b=t.canPlayType('audio/'+v+'; codecs="'+c+'"');}else {b=t.canPlayType('audio/'+v+';');}return b!=''&&b!='no'?b:false;}else {return Boolean(p);}},
+	video	: function(v,c) {var b=0,t=document.createElement('video'),p=t.canPlayType; if(p&&v&&(typeof v==='string')){if(c&&(typeof c==='string')){b=t.canPlayType('video/'+v+'; codecs="'+c+'"');}else {b=t.canPlayType('video/'+v+';');}return b!=''&&b!='no'?b:false;	}else {return Boolean(p);}},
+	event	: function(v,e) {var t={'select':'input','change':'input','submit':'form','reset':'form','error':'img','load':'img','abort':'img'};e=e||document.createElement(t[v]||'div');var s=(v in e); if(!s) {if(!e.setAttribute) {e=document.createElement('div');} if(e.setAttribute&&e.removeAttribute) {e.setAttribute(v,''); s=typeof e[v]=='function'; if(typeof e[v]!='undefined') {e[v]=void 0;} e.removeAttribute(v);}}e=null; return s;},
+	/* DO NOT REMOVE: engine / style() / value() / _gets() / _geta() */
+	style	: function(v) {if(v&&(typeof v==='string')) {var d=this._gets(v),t=v.substr(0,1).toUpperCase()+v.substring(1); return this.engine!=""&&d.any?d.css?v:d[this.engine.toLowerCase()]?this.engine+t:false:false;} return false;}, 
+	value	: function(v,a) {if(v&&a&&(typeof v==='string')&&(typeof a==='string')) {var d=this._geta(v,a); a=(a.indexOf("(")>=0?a.slice(0,a.indexOf("(")):a); return this.engine!=""&&d.any?d.css?a:d[this.engine.toLowerCase()]?'-'+this.engine.toLowerCase()+'-'+a:false:false;}return false;},
+	_gets	: function(v) {var i,t,d=new Object(),s=new Array("O","Ms","Khtml","Webkit","Moz"); d["o"]=d["ms"]=d["khtml"]=d["webkit"]=d["moz"]=d["css"]=false; if(v&&(typeof v==='string')) {t=v.substr(0,1).toUpperCase()+v.substring(1); for(i=0;i<s.length;i++) {try {d[s[i].toLowerCase()]=(document.body.style[s[i]+t]!==undefined);}catch(e) {}}}try {d["css"]=(document.body.style[v]!==undefined);}catch(e) {} d["any"]=(d["css"]||d["moz"]||d["khtml"]||d["webkit"]||d["ms"]||d["o"]?true:false); return d;},
+	_geta	: function(v,a) {var i,b=document.body.style[v],d=new Object(),s=new Array("o","ms","khtml","webkit","moz"); try {document.body.style[v]=a;}catch(e) {} d["o"]=d["ms"]=d["khtml"]=d["webkit"]=d["moz"]=false; d["css"]=(document.body.style[v]!==undefined&&document.body.style[v]!=''); if(!d["css"]) {for(i=0;i<s.length;i++) {try {document.body.style[v]='-'+s[i]+'-'+a;}catch(e) {} d[s[i]]=(document.body.style[v]!==undefined&&document.body.style[v]!='');}}try {document.body.style[v]=b;}catch(e) {} d["any"]=(d["css"]||d["moz"]||d["khtml"]||d["webkit"]||d["ms"]||d["o"]?true:false); return d;}
+}
