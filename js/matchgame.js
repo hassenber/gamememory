@@ -11,7 +11,7 @@ var allCards = [
 
 $(document).ready(function() {
 soundManager.setup({
-  url: 'sound/swf/'
+  url: 'swf/'
 });
   soundManager.onready(function() {   
     

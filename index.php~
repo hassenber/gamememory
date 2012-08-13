@@ -17,9 +17,7 @@
 	<script src="js/matchgame.js"></script>
 	<script src="js/flexie.js"></script>
     <script type="text/javascript" src="script/soundmanager2.js"></script>
-    <script type="text/javascript" src="script/360player.js"></script>
-    <script type="text/javascript" src="script/berniecode-animator.js"></script>
-
+    <script type="text/javascript" src="/script/360player.js"></script>
  <!--[if IE]><script type="text/javascript" src="script/excanvas.js"></script><![endif]-->
 <script type="text/javascript">
 var test=1;
