@@ -84,12 +84,10 @@ threeSixtyPlayer.config.useFavIcon = false;
 </head>
 <body>
 	<header>
-		<h1>Memory-match card game</h1>
+<span id="clicks">0</span> click(s) and found <span id="pairs">0</span> pair(s).
+<a id="pause" href="#" style="float:left;" class="pause"></a>
 	</header>
 	<div id="main-container">
-		<div id="stats">
-			<div>You've made <span id="clicks">0</span> click(s) and found <span id="pairs">0</span> pair(s).</div>
-		</div>
 		<div style="clear:both"></div>
 		<section id="game">
 			<div id="cards">
@@ -101,19 +99,9 @@ threeSixtyPlayer.config.useFavIcon = false;
 			<div style="clear:both"></div>
 		</section>
 		<div id="go-2-nxt-lvl"></div>
-		<div id="highscores">
-			<h2>HIGHSCORES</h2>
-			<table id="update-val">
-			</table>
-		
-<a id="pause" href="#" class="pause"></a>
-</div>
 </div>
  
 	</div>
 	<div style="clear:both"></div>
-	<footer>
-	</footer>
-
 </body>
 </html>

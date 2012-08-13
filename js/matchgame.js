@@ -1,24 +1,46 @@
-$(document).ready(startGame);
+var dif=2;
+var score=0;
+
+// card
 var allCards = [
-	"cardAA", "cardA2", "cardA3", "cardA4", "cardA5", "cardA6", "cardA7", "cardA8", "cardA9", "cardA10", "cardAJ", "cardAQ", "cardAK", 
-	"cardBA", "cardB2", "cardB3", "cardB4", "cardB5", "cardB6", "cardB7", "cardB8", "cardB9", "cardB10", "cardBJ", "cardBQ", "cardBK",
-	"cardCA", "cardC2", "cardC3", "cardC4", "cardC5", "cardC6", "cardC7", "cardC8", "cardC9", "cardC10", "cardCJ", "cardCQ", "cardCK",
-	"cardDA", "cardD2", "cardD3", "cardD4", "cardD5", "cardD6", "cardD7", "cardD8", "cardD9", "cardD10", "cardDJ", "cardDQ", "cardDK"
+     "cardAQ", "cardAK", 
+     "cardBQ", "cardBK",
+    "cardCQ", "cardCK",
+     "cardDQ", "cardDK"
 ];
-function startGame() {
+
+$(document).ready(function() {
+soundManager.setup({
+  url: 'sound/swf/'
+});
+  soundManager.onready(function() {   
+    
+    for(var i= 0; i < allCards.length; i++)
+{
+        soundManager.createSound(allCards[i], 'data/'+allCards[i]+'.mp3');
+}
+});
+  startGame(dif);  
+});
+
+
+
+
+function startGame(iterat) {
 		var matchingGame = {};
-		matchingGame = allCards.sort(shuffle).slice(0,12);
+		matchingGame = allCards.sort(shuffle).slice(0,iterat);
 		matchingGame.deck = $.merge(matchingGame, matchingGame);
 		if ($(".card:first-child").hasClass("first")) {
 				$(".card:first-child").removeClass("first");
 				$(".card:first-child").html('<div class="face front"></div><div class="face back"></div>');
 		};
-		$("#clicks, #pairs").text("0");
+		if (iterat==2) $("#clicks, #pairs").text("0");
 		function shuffle() {
 			return 0.5 - Math.random();
 		};
 		matchingGame.deck.sort(shuffle);
-		for (var i=0;i<23;i++) {
+                var iterate=(iterat*2)-1;
+		for (var i=0;i<iterate;i++) {
 			$(".card:first-child").clone().appendTo("#cards")
 		};
 		$("#cards").children(".card").each(function(index) {
@@ -71,13 +93,19 @@ function startGame() {
 	};
 function selectCard() {
 	if ($(".card-flipped").size() > 1) {
+             
 		return;
 	}
+        var cards= Array();
 	if ($(this).hasClass("card-flipped") == false) {
 		update($("#clicks"));
 		};
 	$(this).addClass("card-flipped");
-	if ($(".card-flipped").size() == 2) {
+    soundstop();
+    soundManager.play($(this).attr("data-pattern"));
+        // insere music
+
+	if ($(".card-flipped").size()== 2) {
 		setTimeout(checkPattern,500);
 		}
 	};
@@ -92,7 +120,7 @@ function checkPattern() {
 				$(".card-flipped").removeClass("card-flipped");
 			}
 		if ($("#cards").children().length == $("#cards").children(".card-removed").length) {
-			$("#go-2-nxt-lvl").html("<p>Game Finished!<br />Insert name and email address:<br /><form id='record-data'><table><tr><td><label for='name_value'>Name</label></td><td><input  type=text' id='name_value' value='' maxlength=15 /></td></tr><tr><td><label for='ea_value'>Email Address</label></td><td><input type=text' id='ea_value' value='' maxlength=35 /></td></tr></table></form><p>Note that, empty imput fields or with no valid email address will not be recorded</p>Click OK to restart the game.<br /><button id='reload'>OK</button></p>").fadeIn(1200);
+			$("#go-2-nxt-lvl").html("Step "+dif+"<br /><button id='reload'>OK</button></p>").fadeIn(1200);
 			$("#reload").on("click", function() {
 				$("#go-2-nxt-lvl").fadeOut(500);
 				setTimeout(function() {
@@ -104,14 +132,20 @@ function checkPattern() {
 					var ea_value = $("#ea_value").val();
 					$.post("data/highscore.php?name=" + name_value + "&value=" + hs_value + "&email_add=" + ea_value);
 					setTimeout(function() {
-						startGame()
+                                                score+=pairs;
+                                                if (dif<=8)
+                                                {
+                                                dif++;
+                                                soundstop();                        
+						                        startGame(dif);
+                                                }
 					},100);
 				},400);
 			});
 		}
 		var pairs = Math.floor($(".card-removed").length/2);
-		if ($("#pairs").text() != pairs) {
-			$("#pairs").text(pairs);
+		if ($("#pairs").text() != (pairs+score)) {
+			$("#pairs").text(pairs+score);
 		}
 	};
 function isMatchPattern() {
@@ -121,10 +155,17 @@ function isMatchPattern() {
 	});
 	return (cards[0] == cards[1]);
 };
+function soundstop(){
+    for(var i= 0; i < allCards.length; i++)
+{
+        soundManager.stop(allCards[i]);
+}
+}
+
 function removeTookCards() {
 	$(".card-removed").remove();
-}
+};
 function update(j) {
 	var n = parseInt(j.text(), 10);
 	j.text(n + 1);
-}
+};
