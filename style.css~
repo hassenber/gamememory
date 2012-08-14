@@ -46,7 +46,7 @@ h1 {
 	position: relative;
 	background: url(img/game-bkg.png);
 	width: 550px;
-	height: 430px;
+	height: 570px;
 	margin: 0 auto;
 	
 	display: -webkit-box;

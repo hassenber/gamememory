@@ -8,55 +8,30 @@ var allCards = [
 ];
 
 $(document).ready(function() {
-// set up soundmanager
 soundManager.setup({
   url: 'swf/'
 });
-// create sound
-soundManager.onready(function() {   
+  soundManager.onready(function() {   
     
     for(var i= 0; i < allCards.length; i++)
 {
         soundManager.createSound(allCards[i], 'data/'+allCards[i]+'.mp3');
 }
 });
-// debute le jeux
-  startGame(dif);  
-});
-function contenur(){
-var count=300;
-countdown = setInterval(function(){
-var sec=count%60;
-var min=(count-sec)/60;
-if (sec<10)
-$("p.countdown").html(min+":0"+sec);
-else
-$("p.countdown").html(min+":"+sec);
 
-if (count==0) {
-clearInterval(countdown);
-stopgame();
-}
-count--;
-},1000);
-};
-function stopgame() {
-$("#go-2-nxt-lvl").html("Game Over !<br /><button id='reload'>Start new game</button></p>").fadeIn(1200);
-$("#reload").on("click", function() {
-$("#go-2-nxt-lvl").fadeOut(500);
-score=0;
-dif=2;
-soundstop();
-$(".card:first-child").addClass("first").removeClass("card-removed noclick");
-$(".card").not(".first").remove();
-$(".first").html();
-startGame(dif);
+  startGame(dif);  
+  $('#defaultCountdown').countdown({
+	until: +300,
+	compact: true, 
+	format: 'MS', 
+	description: '',
+	onExpiry:stopgame;
 });
-};
+});
+function stopgame() {
+alert('We have lift off!'); 
+}
 function startGame(iterat) {
-                var step_tour=iterat-1;
-                $("#tour").text(step_tour);
-                if (iterat==2) contenur();
 		var matchingGame = {};
 		matchingGame = allCards.sort(shuffle).slice(0,iterat);
 		matchingGame.deck = $.merge(matchingGame, matchingGame);
@@ -83,6 +58,43 @@ function startGame(iterat) {
 			$(this).attr("data-pattern", pattern[index]);
 			$(this).click(selectCard);
 		});
+		setTimeout(function() {
+		$("#update-val tr").remove();
+		var items=[];
+		$.ajax({
+			type: "GET",
+			url: "data/highscores.xml",
+			dataType: "xml",
+			success: function(xml) {
+				$(xml).find('highscore').each(function(){
+					var name_text = $(this).find('name').text();
+					var value_text = parseInt($(this).find('value').text());
+					items.push({"key":name_text,"value":value_text});
+				});
+				if (items.length >= 1) {
+					$("#update-val").html("<thead><td>Name</td><td>Highscore</td></thead>");
+					var j;
+					var cmp = function(x, y){
+							return x > y ? 1 : x < y ? -1 : 0
+						}
+					items = items.sort(function(x, y){
+						return cmp(x.value, y.value) < cmp(y.value, x.value) ? -1:1
+					});
+					if (items.length<20) {
+						for (j in items) {
+							$('<tr></tr>').html('<td>' + items[j].key + '</td>' + '<td>' + items[j].value + '</td>').appendTo('#update-val');
+							}
+						} else {
+							for (j=0;j<=19;j++) {
+								$('<tr></tr>').html('<td>' + items[j].key + '</td>' + '<td>' + items[j].value + '</td>').appendTo('#update-val');
+							}
+						}
+				} else {
+						$('<tr></tr>').html('<td>Hmmmm... no records so far!</td>').appendTo('#update-val');
+					}
+			}
+		});
+		},1800);
 	};
 function selectCard() {
 	if ($(".card-flipped").size() > 1) {
@@ -120,6 +132,10 @@ function checkPattern() {
 					$(".card:first-child").addClass("first").removeClass("card-removed noclick");
 					$(".card").not(".first").remove();
 					$(".first").html();
+					var hs_value = $("#clicks").text();
+					var name_value = $("#name_value").val();
+					var ea_value = $("#ea_value").val();
+					$.post("data/highscore.php?name=" + name_value + "&value=" + hs_value + "&email_add=" + ea_value);
 					setTimeout(function() {
                                                 score+=pairs;
                                                 if (dif<8)
@@ -135,9 +151,6 @@ function checkPattern() {
 		var pairs = Math.floor($(".card-removed").length/2);
 		if ($("#pairs").text() != (pairs+score)) {
 			$("#pairs").text(pairs+score);
-                        var tx_score=parseInt($("#score").text());
-                        tx_score+=100;
-                        $("#score").text(tx_score);
 		}
 	};
 function isMatchPattern() {
@@ -152,7 +165,7 @@ function soundstop(){
 {
         soundManager.stop(allCards[i]);
 }
-};
+}
 
 function removeTookCards() {
 	$(".card-removed").remove();
