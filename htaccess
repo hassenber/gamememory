@@ -1,4 +1,0 @@
-# set Cache-Content
-<FilesMatch "\.(xml|txt|xls)$">
-Header set Cache-Control "max-age=0, must-revalidate"
-</FilesMatch>
