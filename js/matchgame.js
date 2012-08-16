@@ -93,7 +93,7 @@ function startGame(iterat) {
 		
 		$("#cards").children(".card").each(function(index) {
                         var _content=parseInt($(document).width());
-                        _content=parseInt(_content/130);
+                        _content=parseInt(_content/135);
                     	$(this).css({
 				"left" : ($(this).width() + 10) * (index % _content),
 				"top" : ($(this).height() + 10) * Math.floor(index/_content)
