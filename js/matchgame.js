@@ -1,26 +1,31 @@
 var dif=2;
 var score=0;
 var allCards = [
-     "cardAQ", "cardAK", 
-     "cardBQ", "cardBK",
-    "cardCQ", "cardCK",
-     "cardDQ", "cardDK"
+     "card20A", "card21A", 
+     "card22A", "card23A", 
+     "card24A", "card25A", 
+     "card26A", "card27A", 
+     "card28A"
 ];
-
 $(document).ready(function() {
 // set up soundmanager
 soundManager.setup({
   url: 'swf/'
 });
+
 // create sound
 soundManager.onready(function() {   
     
     for(var i= 0; i < allCards.length; i++)
 {
-        soundManager.createSound(allCards[i], 'data/'+allCards[i]+'.mp3');
+    tmp = allCards[i].replace("card","");    
+    soundManager.createSound(allCards[i], 'boards/0/'+tmp+'0.mp3');
 }
-});
+});		
 // debute le jeux
+
+
+               
   startGame(dif);  
 });
 function contenur(){
@@ -29,9 +34,9 @@ countdown = setInterval(function(){
 var sec=count%60;
 var min=(count-sec)/60;
 if (sec<10)
-$("p.countdown").html(min+":0"+sec);
+$("h1.countdown").html(min+":0"+sec);
 else
-$("p.countdown").html(min+":"+sec);
+$("h1.countdown").html(min+":"+sec);
 
 if (count==0) {
 clearInterval(countdown);
@@ -41,30 +46,41 @@ count--;
 },1000);
 };
 function stopgame() {
-$("#go-2-nxt-lvl").html("Game Over !<br /><button id='reload'>Start new game</button></p>").fadeIn(1200);
-$("#reload").on("click", function() {
-$("#go-2-nxt-lvl").fadeOut(500);
 score=0;
 dif=2;
 soundstop();
-$(".card:first-child").addClass("first").removeClass("card-removed noclick");
-$(".card").not(".first").remove();
-$(".first").html();
-startGame(dif);
-});
+Sexy.confirm('<h1>Game Over</h1>', { onComplete: 
+                                function(returnvalue) {
+                                        if(returnvalue)
+                                        {
+                                        $(".card:first-child").addClass("first").removeClass("card-removed noclick");
+                                        $(".card").not(".first").remove();
+                                        $(".first").html();
+                                        startGame(dif);
+                                         }
+                                        else
+                                        {
+                                            $(".card:first-child").addClass("first").removeClass("card-removed noclick");
+                                            $(".card").not(".first").remove();
+                                            $(".first").html();
+                                            Sexy.alert('<h1>Game Over</h1>');
+                                        }
+                                }});
 };
 function startGame(iterat) {
                 var step_tour=iterat-1;
-                $("#tour").text(step_tour);
-                if (iterat==2) contenur();
-		var matchingGame = {};
+                $(".tour").text(step_tour);
+                if (iterat==2) {
+                contenur();
+		  }
+                var matchingGame = {};
 		matchingGame = allCards.sort(shuffle).slice(0,iterat);
 		matchingGame.deck = $.merge(matchingGame, matchingGame);
 		if ($(".card:first-child").hasClass("first")) {
 				$(".card:first-child").removeClass("first");
 				$(".card:first-child").html('<div class="face front"></div><div class="face back"></div>');
 		};
-		if (iterat==2) $("#clicks, #pairs").text("0");
+		if (iterat==2) $(".clicks, .pairs").text("0");
 		function shuffle() {
 			return 0.5 - Math.random();
 		};
@@ -73,10 +89,14 @@ function startGame(iterat) {
 		for (var i=0;i<iterate;i++) {
 			$(".card:first-child").clone().appendTo("#cards")
 		};
+		
+		
 		$("#cards").children(".card").each(function(index) {
-			$(this).css({
-				"left" : ($(this).width() + 10) * (index % 6),
-				"top" : ($(this).height() + 10) * Math.floor(index/6)
+                        var _content=parseInt($(document).width());
+                        _content=parseInt(_content/130);
+                    	$(this).css({
+				"left" : ($(this).width() + 10) * (index % _content),
+				"top" : ($(this).height() + 10) * Math.floor(index/_content)
 				});
 			var pattern = $(matchingGame.deck).get();
 			$(this).find(".back").addClass(pattern[index]);
@@ -86,12 +106,13 @@ function startGame(iterat) {
 	};
 function selectCard() {
 	if ($(".card-flipped").size() > 1) {
-             
-		return;
+             return;
 	}
         var cards= Array();
 	if ($(this).hasClass("card-flipped") == false) {
-		update($("#clicks"));
+		update($(".clicks:first"));
+		update($(".clicks:last"));
+
 		};
 	$(this).addClass("card-flipped");
     soundstop();
@@ -113,31 +134,34 @@ function checkPattern() {
 				$(".card-flipped").removeClass("card-flipped");
 			}
 		if ($("#cards").children().length == $("#cards").children(".card-removed").length) {
-			$("#go-2-nxt-lvl").html("Step "+dif+"<br /><button id='reload'>OK</button></p>").fadeIn(1200);
-			$("#reload").on("click", function() {
-				$("#go-2-nxt-lvl").fadeOut(500);
-				setTimeout(function() {
-					$(".card:first-child").addClass("first").removeClass("card-removed noclick");
+                         Sexy.confirm('<h1>Congratulation</h1><p>Step '+dif+'</p>', { onComplete: 
+                                function(returnvalue) {
+                                        if(returnvalue)
+                                        {
+                                              $(".card:first-child").addClass("first").removeClass("card-removed noclick");
 					$(".card").not(".first").remove();
 					$(".first").html();
-					setTimeout(function() {
-                                                score+=pairs;
-                                                if (dif<8)
-                                                {
+					score+=pairs;
+                                        if (dif<8)
+                                        {
                                                 	dif++;
-                                                	soundstop();                        
-						        startGame(dif);
-                                                }
-					},100);
-				},400);
-			});
+							soundstop();
+                                                        startGame(dif);
+                                        }
+                                         }
+                                        else
+                                        {
+                                            Sexy.alert('<h1>Game Over</h1>');
+                                        }
+                                }
+                });
 		}
 		var pairs = Math.floor($(".card-removed").length/2);
-		if ($("#pairs").text() != (pairs+score)) {
-			$("#pairs").text(pairs+score);
-                        var tx_score=parseInt($("#score").text());
+		if ($(".pairs:first").text() != (pairs+score)) {
+			$(".pairs").text(pairs+score);
+                        var tx_score=parseInt($(".score:first").text());
                         tx_score+=100;
-                        $("#score").text(tx_score);
+                        $(".score").text(tx_score);
 		}
 	};
 function isMatchPattern() {

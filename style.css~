@@ -33,7 +33,7 @@
 }
 
 @-moz-document url-prefix() { 
-	#cards {margin-top:0px}
+	#cards {margin-top:25px}
 }
 
 .card {
